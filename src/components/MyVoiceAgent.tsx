@@ -8,9 +8,21 @@ import {
   useVoiceAssistant,
   useLocalParticipant,
 } from "@livekit/components-react";
-import { Mic, MicOff, PhoneOff, Volume2 } from "lucide-react";
+import { Mic, MicOff, PhoneOff, Volume2, MessageSquare, Menu } from "lucide-react";
 
-export function MyVoiceAgent() {
+interface MyVoiceAgentProps {
+  sidebarOpen: boolean;
+  setSidebarOpen: (open: boolean) => void;
+  activeMode: "text" | "voice";
+  setActiveMode: (mode: "text" | "voice") => void;
+}
+
+export function MyVoiceAgent({
+  sidebarOpen,
+  setSidebarOpen,
+  activeMode,
+  setActiveMode,
+}: MyVoiceAgentProps) {
   const [token, setToken] = useState<string | null>(null);
   const [serverUrl, setServerUrl] = useState<string | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
@@ -52,60 +64,97 @@ export function MyVoiceAgent() {
   };
 
   return (
-    <div className="flex flex-col h-full w-full bg-black text-neutral-100 rounded-2xl overflow-hidden border border-neutral-900 shadow-2xl p-6 justify-between min-h-[400px]">
-      <div className="text-center">
-        <h2 className="text-sm font-semibold text-white font-mono uppercase tracking-wider mb-2">Voice Guide (Audio Agent)</h2>
-        <p className="text-[11px] text-neutral-500 max-w-md mx-auto">
-          Speak directly to Travlex. Designed for blind and visually impaired travelers to hear and speak travel queries hands-free.
-        </p>
-      </div>
-
-      <div className="flex-1 flex flex-col items-center justify-center my-6">
-        {error && (
-          <div 
-            className="mb-4 p-3 bg-neutral-950 border border-neutral-800 text-white text-xs rounded-lg max-w-sm text-center"
-            role="alert"
-          >
-            {error}
+    <div className="flex flex-col h-full w-full bg-black text-neutral-100 overflow-hidden">
+      
+      {/* Voice Assistant Header matching Text Assistant */}
+      <div className="bg-neutral-950 border-b border-neutral-900 px-6 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          {!sidebarOpen && (
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="p-1.5 rounded hover:bg-neutral-900 text-neutral-400 hover:text-white transition-all cursor-pointer mr-1"
+              aria-label="Open sidebar"
+            >
+              <Menu className="w-4 h-4" />
+            </button>
+          )}
+          <div>
+            <h2 className="text-sm font-semibold text-white font-mono uppercase tracking-wider">Voice Guide</h2>
+            <p className="text-[11px] text-neutral-500">Real-time voice guidance powered by LiveKit</p>
           </div>
-        )}
-
-        {token && serverUrl ? (
-          <LiveKitRoom
-            token={token}
-            serverUrl={serverUrl}
-            connect={true}
-            audio={true}
-            video={false}
-            onDisconnected={endVoiceSession}
-            className="flex flex-col items-center gap-6 w-full"
-          >
-            <VoiceAgentActiveView onDisconnect={endVoiceSession} />
-            <RoomAudioRenderer />
-          </LiveKitRoom>
-        ) : (
+        </div>
+        
+        <div className="flex items-center gap-4">
           <button
-            onClick={startVoiceSession}
-            disabled={isConnecting}
-            className={`w-36 h-36 rounded-full flex flex-col items-center justify-center gap-2 border transition-all duration-300 ${
-              isConnecting
-                ? "bg-neutral-950 border-neutral-900 cursor-not-allowed animate-pulse text-neutral-500"
-                : "bg-white text-black border-white hover:bg-black hover:text-white hover:border-neutral-800 hover:scale-105 active:scale-95"
-            }`}
-            aria-label={isConnecting ? "Connecting to voice guide" : "Start voice guide"}
-            aria-live="polite"
+            onClick={() => setActiveMode("text")}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-neutral-800 bg-neutral-950 hover:bg-neutral-900 text-[11px] font-mono text-neutral-200 hover:text-white transition-all cursor-pointer"
+            aria-label="Switch to Text Assistant"
           >
-            <Volume2 className="w-12 h-12" />
-            <span className="text-[10px] font-mono font-bold tracking-wider">
-              {isConnecting ? "CONNECTING..." : "START GUIDE"}
-            </span>
+            <MessageSquare className="w-3.5 h-3.5" />
+            TEXT CHAT
           </button>
-        )}
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full border border-white bg-black animate-pulse"></span>
+            <span className="text-[10px] text-neutral-400 font-mono">Llama-3.1 Active</span>
+          </div>
+        </div>
       </div>
 
-      <div className="text-center text-[10px] font-mono text-neutral-600">
-        {!token && "Click 'START GUIDE' and grant microphone permissions to talk."}
-        {token && "Speaking is enabled. You can mute yourself or click disconnect at any time."}
+      {/* Main Voice Workspace */}
+      <div className="flex-1 flex flex-col justify-between p-6 overflow-y-auto">
+        <div className="text-center my-4">
+          <p className="text-xs text-neutral-400 max-w-md mx-auto">
+            Speak directly to Travlex. Designed for blind and visually impaired travelers to hear and speak travel queries hands-free.
+          </p>
+        </div>
+
+        <div className="flex-1 flex flex-col items-center justify-center my-6">
+          {error && (
+            <div 
+              className="mb-4 p-3 bg-neutral-950 border border-neutral-800 text-white text-xs rounded-lg max-w-sm text-center font-mono"
+              role="alert"
+            >
+              {error}
+            </div>
+          )}
+
+          {token && serverUrl ? (
+            <LiveKitRoom
+              token={token}
+              serverUrl={serverUrl}
+              connect={true}
+              audio={true}
+              video={false}
+              onDisconnected={endVoiceSession}
+              className="flex flex-col items-center gap-6 w-full"
+            >
+              <VoiceAgentActiveView onDisconnect={endVoiceSession} />
+              <RoomAudioRenderer />
+            </LiveKitRoom>
+          ) : (
+            <button
+              onClick={startVoiceSession}
+              disabled={isConnecting}
+              className={`w-36 h-36 rounded-full flex flex-col items-center justify-center gap-2 border transition-all duration-300 ${
+                isConnecting
+                  ? "bg-neutral-950 border-neutral-900 cursor-not-allowed animate-pulse text-neutral-500"
+                  : "bg-white text-black border-white hover:bg-black hover:text-white hover:border-neutral-800 hover:scale-105 active:scale-95 cursor-pointer shadow-lg"
+              }`}
+              aria-label={isConnecting ? "Connecting to voice guide" : "Start voice guide"}
+              aria-live="polite"
+            >
+              <Volume2 className="w-12 h-12" />
+              <span className="text-[10px] font-mono font-bold tracking-wider">
+                {isConnecting ? "CONNECTING..." : "START GUIDE"}
+              </span>
+            </button>
+          )}
+        </div>
+
+        <div className="text-center text-[10px] font-mono text-neutral-600 mb-4">
+          {!token && "Click 'START GUIDE' and grant microphone permissions to talk."}
+          {token && "Speaking is enabled. You can mute yourself or click disconnect at any time."}
+        </div>
       </div>
     </div>
   );
