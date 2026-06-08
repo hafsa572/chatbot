@@ -1,5 +1,5 @@
 import { createOpenAI } from "@ai-sdk/openai";
-import { streamText, tool } from "ai";
+import { streamText, tool, convertToModelMessages } from "ai";
 import { z } from "zod";
 import { searchPlaces, getPlaceDetails } from "@/lib/search";
 
@@ -31,7 +31,7 @@ export async function POST(req: Request) {
         "and rely ONLY on facts from the database for those regions. For all other regions of India, use your own " +
         "general knowledge to recommend and describe places. Do not make up place details or reviews. " +
         "When recommending lists of places, keep it to a concise, clear list of up to 5 recommendations with basic metrics (rating, state, district, category, best season).",
-      messages,
+      messages: convertToModelMessages(messages),
       tools: {
         searchTourismDatabase: tool({
           description: "Search for tourist spots in Jammu & Kashmir / Ladakh using search terms (keywords, district, vibe, activity, season).",
