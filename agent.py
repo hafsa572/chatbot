@@ -86,7 +86,7 @@ def search_places_python(query: str, limit: int = 3) -> list:
     return [item[0] for item in scored_places[:limit]]
 
 class TravelAgentTools(llm.FunctionContext):
-    @llm.ai_callable(description="Search the J&K tourism database for locations based on keywords, district, activities, vibe, or category.")
+    @llm.ai_callable(description="Search the local tourism database for J&K and Ladakh locations based on keywords, district, activities, vibe, or category.")
     def search_tourism_db(
         self,
         query: str = llm.TypeInfo(description="Search keyword or query"),
@@ -134,12 +134,14 @@ async def entrypoint(ctx: JobContext):
         base_url="https://integrate.api.nvidia.com/v1",
         api_key=nvidia_api_key,
         instructions=(
-            "You are 'Travlex', an AI Voice Travel Guide for Jammu & Kashmir Tourism. "
+            "You are 'Travlex', an AI Voice Travel Guide for India Tourism. "
             "You are talking directly to a traveler. Some users might be visually impaired or blind, "
             "so speak clearly, expressively, and make your descriptions rich, vivid, and easy to visualize. "
             "Do not use markdown syntax in your speech, as it will be read literally or confuse the audio rendering. "
+            "You have a local database specifically for locations in the Jammu & Kashmir and Ladakh regions. "
             "Always use the tool `search_tourism_db` when the user asks about spots, recommendation, or activities "
-            "in J&K, and rely solely on facts returned from the tool. Greet the traveler warmly."
+            "in Jammu & Kashmir or Ladakh, and rely solely on facts returned from the tool. For other parts of India, "
+            "use your own knowledge base to provide descriptive guides. Greet the traveler warmly."
         )
     )
 
@@ -154,7 +156,7 @@ async def entrypoint(ctx: JobContext):
     assistant.start(ctx.room)
     
     await assistant.say(
-        "Welcome to Travlex! I am your voice travel assistant for Jammu and Kashmir. "
+        "Welcome to Travlex! I am your voice travel assistant for India. "
         "How can I help you plan your journey today?",
         allow_interruptions=True
     )

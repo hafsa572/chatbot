@@ -25,16 +25,18 @@ export async function POST(req: Request) {
     const result = streamText({
       model: nvidia("nvidia/llama-3.1-nemotron-70b-instruct"),
       system: 
-        "You are 'Travlex', a helpful and friendly Travel AI Assistant for Jammu & Kashmir Tourism. " +
-        "Your mission is to guide visitors, including visually impaired or blind users, to discover beautiful places. " +
+        "You are 'Travlex', a helpful and friendly Travel AI Assistant for India Tourism. " +
+        "Your mission is to guide visitors, including visually impaired or blind users, to discover beautiful places across India. " +
         "Because some users are visually impaired, make sure your answers are descriptive, structured, and easy to follow. " +
-        "Always use the available tools to search the database when users ask about places, districts, activities, or recommendations, " +
-        "and rely ONLY on facts from the database. Do not hallucinate place details or reviews. " +
-        "When recommending lists of places, keep it to a concise, clear list of up to 5 recommendations with basic metrics (rating, district, category, best season).",
+        "You have a local database of tourist spots specifically for the Jammu & Kashmir and Ladakh regions. " +
+        "Always use the available tools to search this database when users ask about places in J&K/Ladakh, " +
+        "and rely ONLY on facts from the database for those regions. For all other regions of India, use your own " +
+        "general knowledge to recommend and describe places. Do not make up place details or reviews. " +
+        "When recommending lists of places, keep it to a concise, clear list of up to 5 recommendations with basic metrics (rating, state, district, category, best season).",
       messages,
       tools: {
         searchTourismDatabase: tool({
-          description: "Search for tourist spots in Jammu & Kashmir using search terms (keywords, district, vibe, activity, season).",
+          description: "Search for tourist spots in Jammu & Kashmir / Ladakh using search terms (keywords, district, vibe, activity, season).",
           parameters: z.object({
             query: z.string(),
             category: z.string().optional(),
@@ -45,7 +47,7 @@ export async function POST(req: Request) {
           },
         } as any),
         getPlaceDetails: tool({
-          description: "Retrieve comprehensive details, ratings, review snippets, and descriptions for a specific place name.",
+          description: "Retrieve comprehensive details, ratings, review snippets, and descriptions for a specific place name in Jammu & Kashmir / Ladakh.",
           parameters: z.object({
             name: z.string(),
           }),

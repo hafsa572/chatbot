@@ -1,10 +1,10 @@
-# Travlex: Jammu & Kashmir Travel AI Assistant (Next.js + LiveKit Voice Agent)
+# Travlex: India Travel AI Assistant (Next.js + LiveKit Voice Agent)
 
-Travlex is a state-of-the-art travel AI chatbot and voice agent built specifically for J&K Tourism. It features a rich text-based interface and a real-time voice guidance interface designed to be fully accessible for blind and visually impaired users.
+Travlex is a state-of-the-art travel AI chatbot and voice agent built specifically for India Tourism. It features a rich text-based interface and a real-time voice guidance interface designed to be fully accessible for blind and visually impaired users.
 
 The project is split into two components:
-1. **Next.js Full-Stack App**: Deployed on Cloudflare Pages/Workers using `@opennextjs/cloudflare`. It hosts the chat UI, the token endpoint, and the OpenAI-integrated chat API.
-2. **Python LiveKit Voice Agent**: A persistent voice assistant script (`agent.py`) that runs locally or on a VPS/fly.io. It joins the LiveKit audio room, listens to the user, queries the J&K tourism database, and speaks back using OpenAI's voice models.
+1. **Next.js Full-Stack App**: Deployed on Cloudflare Pages/Workers using `@opennextjs/cloudflare`. It hosts the chat UI, the token endpoint, and the NVIDIA-integrated chat API.
+2. **Python LiveKit Voice Agent**: A persistent voice assistant script (`agent.py`) that runs locally or on a VPS/fly.io. It joins the LiveKit audio room, listens to the user, queries the database, and speaks back using OpenAI's voice models.
 
 ---
 
@@ -12,8 +12,8 @@ The project is split into two components:
 - **Framework**: Next.js 16 (App Router)
 - **Deployment Platform**: Cloudflare Pages / Workers Runtime
 - **Text Chat Engine**: `assistant-ui` + Vercel AI SDK + NVIDIA Llama-3.1-Nemotron-70b-Instruct
-- **Voice Agent**: LiveKit Realtime Audio + OpenAI (Whisper STT, GPT-4o-mini, OpenAI TTS)
-- **Data Source**: Embedded static JSON module (`src/data/places.json`) compiled from J&K tripadvisor dataset.
+- **Voice Agent**: LiveKit Realtime Audio + OpenAI (Whisper STT, GPT-4o-mini via NVIDIA API, OpenAI TTS)
+- **Data Source**: Embedded static JSON module (`src/data/places.json`) compiled from the tripadvisor dataset.
 
 ---
 

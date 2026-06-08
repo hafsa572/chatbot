@@ -23,14 +23,14 @@ export default function Home() {
                 TRAVLEX
               </h1>
               <p className="text-[10px] text-slate-400 tracking-wider font-semibold uppercase">
-                Jammu & Kashmir Travel Companion
+                India Travel Companion
               </p>
             </div>
           </div>
           
           <div className="flex items-center gap-4">
             <span className="text-xs px-3 py-1 bg-slate-800 rounded-full border border-slate-700 text-slate-300 font-medium">
-              Loaded: {placesData.length} Locations
+              Loaded: {placesData.length} local locations
             </span>
           </div>
         </div>
@@ -46,10 +46,10 @@ export default function Home() {
               Inclusive Travel AI
             </span>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-100 tracking-tight mb-4">
-              Explore Paradise with Voice & Text
+              Explore India with Voice & Text
             </h2>
             <p className="text-slate-300 leading-relaxed mb-6">
-              Travlex is a specialized AI travel companion for Jammu & Kashmir, configured with real-time text chat
+              Travlex is an AI travel companion for India, configured with real-time text chat
               and live audio streams. This project is built specifically to assist visually impaired or blind users
               with descriptive, voice-first navigation guides.
             </p>
