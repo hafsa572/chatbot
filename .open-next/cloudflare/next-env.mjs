@@ -1,0 +1,3 @@
+export const production = {"LIVEKIT_URL":"wss://hafsa-1j19ui85.livekit.cloud","LIVEKIT_API_KEY":"APIE4nuxaLhQz7Y","LIVEKIT_API_SECRET":"cvP68QhAf8vF4o7H2Jiu5os93uPKirsXi4keCKrG9zL","NVIDIA_API_KEY":"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"};
+export const development = {"LIVEKIT_URL":"wss://hafsa-1j19ui85.livekit.cloud","LIVEKIT_API_KEY":"APIE4nuxaLhQz7Y","LIVEKIT_API_SECRET":"cvP68QhAf8vF4o7H2Jiu5os93uPKirsXi4keCKrG9zL","NVIDIA_API_KEY":"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"};
+export const test = {};

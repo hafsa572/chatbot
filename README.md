@@ -1,5 +1,7 @@
 # Travlex: India Travel AI Assistant (Next.js + LiveKit Voice Agent)
 
+**Live Deployed Application**: [https://travlex-chatbot.shraj.workers.dev](https://travlex-chatbot.shraj.workers.dev)
+
 Travlex is a state-of-the-art travel AI chatbot and voice agent built specifically for India Tourism. It features a rich text-based interface and a real-time voice guidance interface designed to be fully accessible for blind and visually impaired users.
 
 The project is split into two components:

@@ -8,7 +8,7 @@ import { Thread } from "@/components/assistant-ui/thread";
 export function MyAssistant() {
   const chat = useChat({
     api: "/api/chat",
-  });
+  } as any);
   const runtime = useChatRuntime(chat);
 
   return (
@@ -25,11 +25,7 @@ export function MyAssistant() {
       </div>
       <div className="flex-1 overflow-hidden p-2">
         <AssistantRuntimeProvider runtime={runtime}>
-          <Thread 
-            welcome={{
-              message: "Hi! I'm Travlex. I can answer questions about tourist spots in Jammu & Kashmir or any other travel destinations in India. What kind of place would you like to explore today?"
-            }}
-          />
+          <Thread />
         </AssistantRuntimeProvider>
       </div>
     </div>
