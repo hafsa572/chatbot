@@ -101,7 +101,7 @@ export function scorePlace(place: Place, query: string, categoryFilter?: string)
   return score;
 }
 
-export function searchPlaces(query: string, categoryFilter: string = "All", limit: number = 5): Place[] {
+export function searchPlaces(query: string = "", categoryFilter: string = "All", limit: number = 5): Place[] {
   if (places.length === 0) return [];
 
   let filtered = places;
@@ -110,7 +110,8 @@ export function searchPlaces(query: string, categoryFilter: string = "All", limi
     filtered = filtered.filter((p) => normalizeText(p.category) === catNorm);
   }
 
-  if (query.trim()) {
+  const safeQuery = query || "";
+  if (safeQuery.trim()) {
     const scored = filtered.map((place) => ({
       place,
       score: scorePlace(place, query, categoryFilter),

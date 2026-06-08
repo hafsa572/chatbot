@@ -21,7 +21,7 @@ export async function POST(req: Request) {
     });
 
     const result = streamText({
-      model: nvidia.chat("nvidia/llama-3.1-nemotron-70b-instruct"),
+      model: nvidia.chat("meta/llama-3.1-70b-instruct"),
       system: 
         "You are 'Travlex', a helpful and friendly Travel AI Assistant for India Tourism. " +
         "Your mission is to guide visitors, including visually impaired or blind users, to discover beautiful places across India. " +
@@ -36,23 +36,28 @@ export async function POST(req: Request) {
         searchTourismDatabase: tool({
           description: "Search for tourist spots in Jammu & Kashmir / Ladakh using search terms (keywords, district, vibe, activity, season).",
           parameters: z.object({
-            query: z.string(),
+            query: z.string().optional(),
+            keywords: z.string().optional(),
             category: z.string().optional(),
           }),
-          execute: async ({ query, category }: { query: string; category?: string }) => {
-            const results = searchPlaces(query, category || "All", 5);
+          execute: async ({ query, keywords, category }: { query?: string; keywords?: string; category?: string }) => {
+            const searchQuery = query || keywords || "";
+            const results = searchPlaces(searchQuery, category || "All", 5);
             return results;
           },
         } as any),
         getPlaceDetails: tool({
           description: "Retrieve comprehensive details, ratings, review snippets, and descriptions for a specific place name in Jammu & Kashmir / Ladakh.",
           parameters: z.object({
-            name: z.string(),
+            name: z.string().optional(),
+            place_name: z.string().optional(),
+            place: z.string().optional(),
           }),
-          execute: async ({ name }: { name: string }) => {
-            const detail = getPlaceDetails(name);
+          execute: async ({ name, place_name, place }: { name?: string; place_name?: string; place?: string }) => {
+            const searchName = name || place_name || place || "";
+            const detail = getPlaceDetails(searchName);
             if (!detail) {
-              return { error: `Place '${name}' not found in the database.` };
+              return { error: `Place '${searchName}' not found in the database.` };
             }
             return detail;
           },

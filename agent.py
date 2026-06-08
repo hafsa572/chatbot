@@ -130,7 +130,7 @@ async def entrypoint(ctx: JobContext):
         return
         
     nvidia_llm = openai.LLM(
-        model="nvidia/llama-3.1-nemotron-70b-instruct",
+        model="meta/llama-3.1-70b-instruct",
         base_url="https://integrate.api.nvidia.com/v1",
         api_key=nvidia_api_key,
         instructions=(
