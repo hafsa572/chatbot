@@ -1,36 +1,72 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Travlex: Jammu & Kashmir Travel AI Assistant (Next.js + LiveKit Voice Agent)
 
-## Getting Started
+Travlex is a state-of-the-art travel AI chatbot and voice agent built specifically for J&K Tourism. It features a rich text-based interface and a real-time voice guidance interface designed to be fully accessible for blind and visually impaired users.
 
-First, run the development server:
+The project is split into two components:
+1. **Next.js Full-Stack App**: Deployed on Cloudflare Pages/Workers using `@opennextjs/cloudflare`. It hosts the chat UI, the token endpoint, and the OpenAI-integrated chat API.
+2. **Python LiveKit Voice Agent**: A persistent voice assistant script (`agent.py`) that runs locally or on a VPS/fly.io. It joins the LiveKit audio room, listens to the user, queries the J&K tourism database, and speaks back using OpenAI's voice models.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+---
+
+## Technical Stack
+- **Framework**: Next.js 16 (App Router)
+- **Deployment Platform**: Cloudflare Pages / Workers Runtime
+- **Text Chat Engine**: `assistant-ui` + Vercel AI SDK + NVIDIA Llama-3.1-Nemotron-70b-Instruct
+- **Voice Agent**: LiveKit Realtime Audio + OpenAI (Whisper STT, GPT-4o-mini, OpenAI TTS)
+- **Data Source**: Embedded static JSON module (`src/data/places.json`) compiled from J&K tripadvisor dataset.
+
+---
+
+## Environment Setup
+Create a `.dev.vars` (for Wrangler/Cloudflare emulation) and a `.env.local` (for Next.js dev server) in the root directory:
+
+```text
+LIVEKIT_URL="wss://your-livekit-server-url"
+LIVEKIT_API_KEY="your-livekit-api-key"
+LIVEKIT_API_SECRET="your-livekit-api-secret"
+NVIDIA_API_KEY="your-nvidia-api-key"
+OPENAI_API_KEY="your-openai-api-key" # Optional: required for agent.py STT/TTS
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+For production deployment, add these environment variables as Secrets in your Cloudflare Pages Dashboard or run `wrangler secret put <KEY>`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## How to Run Locally
 
-## Learn More
+### 1. Run the Next.js Frontend
+Install the Node dependencies:
+```bash
+bun install
+```
 
-To learn more about Next.js, take a look at the following resources:
+Start the Next.js dev server:
+```bash
+bun run dev
+```
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 2. Run the LiveKit Voice Agent
+The voice agent (`agent.py`) performs heavy audio streaming and VAD (Voice Activity Detection), which require a persistent Python worker environment instead of serverless edge nodes.
 
-## Deploy on Vercel
+Install the Python dependencies:
+```bash
+pip install "livekit-agents[openai,silero]" python-dotenv
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Start the LiveKit agent worker in development mode:
+```bash
+python agent.py dev
+```
+Once the agent is running, click **START GUIDE** in the web interface to connect.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## Production Deployment to Cloudflare
+Build and deploy the Next.js app to Cloudflare:
+```bash
+bun run deploy
+```
+This builds your Next.js application using OpenNext and deploys it automatically to your Cloudflare Pages account.
