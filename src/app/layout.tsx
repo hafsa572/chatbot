@@ -18,8 +18,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Travlex - J&K Travel AI Assistant",
-  description: "Accessible Travel Assistant for Jammu & Kashmir Tourism, featuring text and real-time voice guidance.",
+  title: "Travlex — India Travel AI Assistant",
+  description: "Accessible Travel Assistant for India Tourism, featuring text and real-time voice guidance.",
 };
 
 export default function RootLayout({
@@ -30,9 +30,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
     >
-      <body className="min-h-full flex flex-col bg-slate-950 text-slate-100">
+      <body className="min-h-full flex flex-col bg-black text-neutral-100 selection:bg-neutral-800 selection:text-white">
         <TooltipProvider>
           {children}
         </TooltipProvider>

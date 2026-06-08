@@ -12,18 +12,18 @@ export function MyAssistant() {
   const runtime = useChatRuntime(chat);
 
   return (
-    <div className="flex flex-col h-full w-full bg-slate-900 text-slate-100 rounded-2xl overflow-hidden border border-slate-700 shadow-2xl">
-      <div className="bg-slate-800 border-b border-slate-700 px-6 py-4 flex items-center justify-between">
+    <div className="flex flex-col h-full w-full bg-black text-neutral-100 rounded-2xl overflow-hidden border border-neutral-900 shadow-2xl">
+      <div className="bg-neutral-950 border-b border-neutral-900 px-6 py-4 flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-slate-100">Travlex Text Assistant</h2>
-          <p className="text-xs text-slate-400">Ask questions about locations, districts, categories, and activities</p>
+          <h2 className="text-sm font-semibold text-white font-mono uppercase tracking-wider">Text Assistant</h2>
+          <p className="text-[11px] text-neutral-500">Ask about tourist places, district details, and activities in India</p>
         </div>
         <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span className="text-xs text-slate-400 font-medium">NVIDIA Llama Active</span>
+          <span className="w-2.5 h-2.5 rounded-full border border-white bg-black animate-pulse"></span>
+          <span className="text-[10px] text-neutral-400 font-mono">Llama-3.1 Active</span>
         </div>
       </div>
-      <div className="flex-1 overflow-hidden p-2">
+      <div className="flex-1 overflow-hidden p-4">
         <AssistantRuntimeProvider runtime={runtime}>
           <Thread />
         </AssistantRuntimeProvider>

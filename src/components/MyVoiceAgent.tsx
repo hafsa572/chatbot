@@ -52,18 +52,18 @@ export function MyVoiceAgent() {
   };
 
   return (
-    <div className="flex flex-col h-full w-full bg-slate-900 text-slate-100 rounded-2xl overflow-hidden border border-slate-700 shadow-2xl p-6 justify-between min-h-[400px]">
+    <div className="flex flex-col h-full w-full bg-black text-neutral-100 rounded-2xl overflow-hidden border border-neutral-900 shadow-2xl p-6 justify-between min-h-[400px]">
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-slate-100 mb-2">Voice Guide (Audio Agent)</h2>
-        <p className="text-sm text-slate-400 max-w-md mx-auto">
-          Talk directly to Travlex. Designed for blind and visually impaired travelers to hear and speak travel queries.
+        <h2 className="text-sm font-semibold text-white font-mono uppercase tracking-wider mb-2">Voice Guide (Audio Agent)</h2>
+        <p className="text-[11px] text-neutral-500 max-w-md mx-auto">
+          Speak directly to Travlex. Designed for blind and visually impaired travelers to hear and speak travel queries hands-free.
         </p>
       </div>
 
       <div className="flex-1 flex flex-col items-center justify-center my-6">
         {error && (
           <div 
-            className="mb-4 p-3 bg-rose-950/50 border border-rose-800 text-rose-200 text-sm rounded-lg max-w-sm text-center"
+            className="mb-4 p-3 bg-neutral-950 border border-neutral-800 text-white text-xs rounded-lg max-w-sm text-center"
             role="alert"
           >
             {error}
@@ -87,23 +87,23 @@ export function MyVoiceAgent() {
           <button
             onClick={startVoiceSession}
             disabled={isConnecting}
-            className={`w-40 h-40 rounded-full flex flex-col items-center justify-center gap-2 border-4 transition-all duration-300 shadow-lg ${
+            className={`w-36 h-36 rounded-full flex flex-col items-center justify-center gap-2 border transition-all duration-300 ${
               isConnecting
-                ? "bg-slate-800 border-slate-700 cursor-not-allowed animate-pulse"
-                : "bg-emerald-600 hover:bg-emerald-500 border-emerald-400 hover:scale-105 active:scale-95"
+                ? "bg-neutral-950 border-neutral-900 cursor-not-allowed animate-pulse text-neutral-500"
+                : "bg-white text-black border-white hover:bg-black hover:text-white hover:border-neutral-800 hover:scale-105 active:scale-95"
             }`}
             aria-label={isConnecting ? "Connecting to voice guide" : "Start voice guide"}
             aria-live="polite"
           >
-            <Volume2 className="w-16 h-16 text-white" />
-            <span className="text-sm font-bold tracking-wider text-white">
+            <Volume2 className="w-12 h-12" />
+            <span className="text-[10px] font-mono font-bold tracking-wider">
               {isConnecting ? "CONNECTING..." : "START GUIDE"}
             </span>
           </button>
         )}
       </div>
 
-      <div className="text-center text-xs text-slate-500">
+      <div className="text-center text-[10px] font-mono text-neutral-600">
         {!token && "Click 'START GUIDE' and grant microphone permissions to talk."}
         {token && "Speaking is enabled. You can mute yourself or click disconnect at any time."}
       </div>
@@ -135,7 +135,6 @@ function VoiceAgentActiveView({ onDisconnect }: { onDisconnect: () => void }) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isMuted, localParticipant]);
 
-  // Translate agent state to user-friendly accessible screen reader texts
   const getAccessibilityStateText = () => {
     switch (state) {
       case "speaking":
@@ -152,49 +151,49 @@ function VoiceAgentActiveView({ onDisconnect }: { onDisconnect: () => void }) {
   return (
     <div className="flex flex-col items-center gap-6 w-full max-w-sm">
       <div 
-        className="text-lg font-medium text-slate-300 animate-pulse"
+        className="text-sm font-semibold tracking-wide text-neutral-300 animate-pulse font-mono uppercase"
         aria-live="assertive"
         role="status"
       >
         {getAccessibilityStateText()}
       </div>
 
-      <div className="w-full h-24 bg-slate-950 rounded-xl flex items-center justify-center p-4 border border-slate-800">
+      <div className="w-full h-24 bg-neutral-950 rounded-xl flex items-center justify-center p-4 border border-neutral-900">
         {audioTrack ? (
           <BarVisualizer 
             trackRef={audioTrack} 
-            barCount={9} 
-            className="h-16 w-full text-emerald-500"
+            barCount={11} 
+            className="h-14 w-full text-white"
           />
         ) : (
-          <div className="text-sm text-slate-500">Waiting for agent audio...</div>
+          <div className="text-xs text-neutral-600 font-mono">Waiting for agent audio...</div>
         )}
       </div>
 
       <div className="flex gap-4">
         <button
           onClick={toggleMute}
-          className={`p-4 rounded-full border-2 transition-all ${
+          className={`p-4 rounded-full border transition-all ${
             isMuted
-              ? "bg-rose-950 text-rose-400 border-rose-800 hover:bg-rose-900"
-              : "bg-slate-800 text-slate-200 border-slate-700 hover:bg-slate-700"
+              ? "bg-neutral-900 text-neutral-400 border-neutral-800 hover:bg-neutral-800"
+              : "bg-white text-black border-white hover:bg-black hover:text-white hover:border-neutral-800"
           }`}
           aria-label={isMuted ? "Unmute microphone" : "Mute microphone"}
         >
-          {isMuted ? <MicOff className="w-6 h-6" /> : <Mic className="w-6 h-6" />}
+          {isMuted ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
         </button>
 
         <button
           onClick={onDisconnect}
-          className="p-4 rounded-full bg-rose-600 text-white border-2 border-rose-400 hover:bg-rose-500 transition-all"
+          className="p-4 rounded-full bg-neutral-900 text-white border border-neutral-800 hover:bg-white hover:text-black hover:border-white transition-all"
           aria-label="Disconnect voice guide"
         >
-          <PhoneOff className="w-6 h-6" />
+          <PhoneOff className="w-5 h-5" />
         </button>
       </div>
       
-      <p className="text-xs text-slate-400">
-        Tip: Press <kbd className="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700">Spacebar</kbd> (when focused) to toggle mute.
+      <p className="text-[10px] font-mono text-neutral-600">
+        Tip: Press <kbd className="px-1.5 py-0.5 bg-neutral-950 rounded border border-neutral-900">Spacebar</kbd> to toggle mute.
       </p>
     </div>
   );
