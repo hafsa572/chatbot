@@ -1,7 +1,48 @@
 import { NextRequest, NextResponse } from "next/server";
-import { AccessToken } from "livekit-server-sdk";
 
-export const runtime = "edge";
+async function signJwt(
+  payload: Record<string, any>,
+  secret: string
+): Promise<string> {
+  const header = { alg: "HS256", typ: "JWT" };
+  
+  const base64UrlEncode = (input: string | Uint8Array): string => {
+    let bytes: Uint8Array;
+    if (typeof input === "string") {
+      bytes = new TextEncoder().encode(input);
+    } else {
+      bytes = input;
+    }
+    let binString = "";
+    for (let i = 0; i < bytes.length; i++) {
+      binString += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binString)
+      .replace(/=/g, "")
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_");
+  };
+
+  const headerPart = base64UrlEncode(JSON.stringify(header));
+  const payloadPart = base64UrlEncode(JSON.stringify(payload));
+  const signingInput = `${headerPart}.${payloadPart}`;
+
+  const secretBytes = new TextEncoder().encode(secret);
+  const signingInputBytes = new TextEncoder().encode(signingInput);
+
+  const key = await crypto.subtle.importKey(
+    "raw",
+    secretBytes,
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+
+  const signatureBytes = await crypto.subtle.sign("HMAC", key, signingInputBytes);
+  const signaturePart = base64UrlEncode(new Uint8Array(signatureBytes));
+
+  return `${signingInput}.${signaturePart}`;
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -16,27 +57,27 @@ export async function GET(request: NextRequest) {
 
     if (!apiKey || !apiSecret) {
       console.warn("LiveKit environment variables LIVEKIT_API_KEY or LIVEKIT_API_SECRET are missing.");
-      // Fallback/Demo mode token so the app doesn't crash in preview if variables aren't defined
       return NextResponse.json(
         { error: "LiveKit server credentials are not configured on the backend." },
         { status: 500 }
       );
     }
 
-    const at = new AccessToken(apiKey, apiSecret, {
-      identity,
-      name,
-      ttl: "10m",
-    });
+    const payload = {
+      iss: apiKey,
+      sub: identity,
+      name: name,
+      video: {
+        room: roomName,
+        roomJoin: true,
+        canPublish: true,
+        canSubscribe: true,
+      },
+      nbf: Math.floor(Date.now() / 1000) - 10,
+      exp: Math.floor(Date.now() / 1000) + 600,
+    };
 
-    at.addGrant({
-      roomJoin: true,
-      room: roomName,
-      canPublish: true,
-      canSubscribe: true,
-    });
-
-    const token = await at.toJwt();
+    const token = await signJwt(payload, apiSecret);
 
     return NextResponse.json({
       token,
@@ -61,25 +102,26 @@ export async function POST(request: NextRequest) {
 
     if (!apiKey || !apiSecret) {
       return NextResponse.json(
-        { error: "LiveKit server credentials are not configured on the backend." },
+        { error: "LiveKit credentials are not configured on the backend." },
         { status: 500 }
       );
     }
 
-    const at = new AccessToken(apiKey, apiSecret, {
-      identity,
-      name,
-      ttl: "10m",
-    });
+    const payload = {
+      iss: apiKey,
+      sub: identity,
+      name: name,
+      video: {
+        room: roomName,
+        roomJoin: true,
+        canPublish: true,
+        canSubscribe: true,
+      },
+      nbf: Math.floor(Date.now() / 1000) - 10,
+      exp: Math.floor(Date.now() / 1000) + 600,
+    };
 
-    at.addGrant({
-      roomJoin: true,
-      room: roomName,
-      canPublish: true,
-      canSubscribe: true,
-    });
-
-    const token = await at.toJwt();
+    const token = await signJwt(payload, apiSecret);
 
     return NextResponse.json({
       token,

@@ -1,7 +1,4 @@
 {
   "version": 1,
-  "functions": {
-    "/api/chat": {},
-    "/api/token": {}
-  }
+  "functions": {}
 }

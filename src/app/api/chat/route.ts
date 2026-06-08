@@ -3,8 +3,6 @@ import { streamText, tool } from "ai";
 import { z } from "zod";
 import { searchPlaces, getPlaceDetails } from "@/lib/search";
 
-export const runtime = "edge";
-
 export async function POST(req: Request) {
   try {
     const { messages } = await req.json();
@@ -23,7 +21,7 @@ export async function POST(req: Request) {
     });
 
     const result = streamText({
-      model: nvidia("nvidia/llama-3.1-nemotron-70b-instruct"),
+      model: nvidia.chat("nvidia/llama-3.1-nemotron-70b-instruct"),
       system: 
         "You are 'Travlex', a helpful and friendly Travel AI Assistant for India Tourism. " +
         "Your mission is to guide visitors, including visually impaired or blind users, to discover beautiful places across India. " +
@@ -63,7 +61,7 @@ export async function POST(req: Request) {
       maxSteps: 5,
     } as any);
 
-    return (result as any).toDataStreamResponse();
+    return (result as any).toUIMessageStreamResponse();
   } catch (error: any) {
     console.error("Error in chat route:", error);
     return new Response(JSON.stringify({ error: error.message || "An error occurred" }), {
