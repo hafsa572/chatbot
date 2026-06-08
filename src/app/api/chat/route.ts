@@ -66,7 +66,7 @@ export async function POST(req: Request) {
       maxSteps: 5,
     } as any);
 
-    return (result as any).toUIMessageStreamResponse();
+    return (result as any).toDataStreamResponse();
   } catch (error: any) {
     console.error("Error in chat route:", error);
     return new Response(JSON.stringify({ error: error.message || "An error occurred" }), {
