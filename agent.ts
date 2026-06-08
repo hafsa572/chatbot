@@ -1,4 +1,4 @@
-import { defineAgent, voice } from "@livekit/agents";
+import { defineAgent, voice, tool } from "@livekit/agents";
 import * as openai from "@livekit/agents-plugin-openai";
 import * as silero from "@livekit/agents-plugin-silero";
 import dotenv from "dotenv";
@@ -17,6 +17,7 @@ const placesJsonPath = resolve(__dirname, "src", "data", "places.json");
 let placesData: any[] = [];
 if (existsSync(placesJsonPath)) {
   placesData = JSON.parse(readFileSync(placesJsonPath, "utf-8"));
+  console.log(`Loaded ${placesData.length} places from database.`);
 } else {
   console.warn(`Warning: Database not found at ${placesJsonPath}`);
 }
@@ -31,7 +32,7 @@ function normalizeText(text: string): string {
     .trim();
 }
 
-function searchPlacesPython(query: string, limit = 3): any[] {
+function searchPlacesLocal(query: string, limit = 3): any[] {
   const queryNorm = normalizeText(query);
   const tokens = queryNorm.split(" ").filter((t) => t.length > 1);
 
@@ -100,6 +101,27 @@ function formatSearchResults(results: any[]): string {
     .join("\n\n");
 }
 
+// ── Define the tool using the SDK's tool() helper ───────────────────
+const searchTourismDb = tool({
+  description:
+    "Search the local tourism database for India tourism locations based on keywords, district, activities, vibe, or category.",
+  parameters: {
+    type: "object" as const,
+    properties: {
+      query: {
+        type: "string" as const,
+        description: "Search keyword or query",
+      },
+    },
+    required: ["query"],
+  },
+  execute: async (args: { query: string }) => {
+    console.log(`Voice Agent Tool Call: search_tourism_db for '${args.query}'`);
+    const results = searchPlacesLocal(args.query, 3);
+    return formatSearchResults(results);
+  },
+});
+
 // ── Agent definition (LiveKit Agents Node.js SDK) ───────────────────
 interface ProcessUserData {
   vad: silero.VAD;
@@ -112,7 +134,9 @@ export default defineAgent<ProcessUserData>({
   entry: async (ctx) => {
     console.log(`Connecting to room ${ctx.room.name}...`);
     await ctx.connect();
-    console.log(`Connected to room ${ctx.room.name}. Waiting for participant to speak...`);
+    console.log(
+      `Connected to room ${ctx.room.name}. Waiting for participant to speak...`
+    );
 
     // ── NVIDIA LLM (OpenAI-compatible endpoint) ───────────────────
     const nvidiaApiKey = process.env.NVIDIA_API_KEY;
@@ -142,37 +166,7 @@ export default defineAgent<ProcessUserData>({
     const stt = new openai.STT({ apiKey: openaiApiKey });
     const tts = new openai.TTS({ voice: "alloy", apiKey: openaiApiKey });
 
-    // ── Function tool for database search ─────────────────────────
-    const searchTourismDb = {
-      name: "search_tourism_db",
-      description:
-        "Search the local tourism database for India tourism locations based on keywords, district, activities, vibe, or category.",
-      parameters: {
-        type: "object" as const,
-        properties: {
-          query: {
-            type: "string" as const,
-            description: "Search keyword or query",
-          },
-        },
-        required: ["query"],
-      },
-      execute: async (args: { query: string }) => {
-        console.log(`Voice Agent Tool Call: search_tourism_db for '${args.query}'`);
-        const results = searchPlacesPython(args.query, 3);
-        return formatSearchResults(results);
-      },
-    };
-
-    // ── Voice session setup ───────────────────────────────────────
-    const session = new voice.AgentSession({
-      vad: ctx.proc.userData.vad,
-      stt,
-      llm: nvidiaLlm,
-      tts,
-      tools: [searchTourismDb],
-    });
-
+    // ── Voice agent ───────────────────────────────────────────────
     const agent = new voice.Agent({
       instructions:
         "You are 'Travlex', an AI Voice Travel Guide for India Tourism. " +
@@ -183,11 +177,22 @@ export default defineAgent<ProcessUserData>({
         "Always use the tool `search_tourism_db` when the user asks about spots, recommendation, or activities " +
         "in Jammu & Kashmir or Ladakh, and rely solely on facts returned from the tool. For other parts of India, " +
         "use your own knowledge base to provide descriptive guides. Greet the traveler warmly.",
+      tools: {
+        search_tourism_db: searchTourismDb,
+      },
+    });
+
+    // ── Voice session setup ───────────────────────────────────────
+    const session = new voice.AgentSession({
+      vad: ctx.proc.userData.vad,
+      stt,
+      llm: nvidiaLlm,
+      tts,
     });
 
     await session.start({ agent, room: ctx.room });
 
-    await session.say(
+    session.say(
       "Welcome to Travlex! I am your voice travel assistant for India. " +
         "How can I help you plan your journey today?",
       { allowInterruptions: true }
