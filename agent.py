@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 from livekit.agents import JobContext, WorkerOptions, cli, llm
 from livekit.plugins import openai, silero
 
-# Load local .env if present
+# Load local environment files
 load_dotenv(dotenv_path=Path(__file__).parent / ".dev.vars")
 load_dotenv()
 
@@ -33,7 +33,6 @@ def search_places_python(query: str, limit: int = 3) -> list:
     tokens = [t for t in query_norm.split() if len(t) > 1]
     
     if not tokens and not query_norm:
-        # Sort by rating
         return sorted(
             places_data,
             key=lambda p: (p.get("tripadvisor_rating") or 0.0, p.get("tripadvisor_review_count") or 0),
@@ -123,27 +122,37 @@ async def entrypoint(ctx: JobContext):
 
     # Configure Assistant
     fnc_ctx = TravelAgentTools()
+    
+    # Initialize NVIDIA client for LLM
+    nvidia_api_key = os.environ.get("NVIDIA_API_KEY")
+    if not nvidia_api_key:
+        print("Error: NVIDIA_API_KEY environment variable is not set.")
+        return
+        
+    nvidia_llm = openai.LLM(
+        model="nvidia/llama-3.1-nemotron-70b-instruct",
+        base_url="https://integrate.api.nvidia.com/v1",
+        api_key=nvidia_api_key,
+        instructions=(
+            "You are 'Travlex', an AI Voice Travel Guide for Jammu & Kashmir Tourism. "
+            "You are talking directly to a traveler. Some users might be visually impaired or blind, "
+            "so speak clearly, expressively, and make your descriptions rich, vivid, and easy to visualize. "
+            "Do not use markdown syntax in your speech, as it will be read literally or confuse the audio rendering. "
+            "Always use the tool `search_tourism_db` when the user asks about spots, recommendation, or activities "
+            "in J&K, and rely solely on facts returned from the tool. Greet the traveler warmly."
+        )
+    )
+
     assistant = llm.VoiceAssistant(
         vad=silero.VAD.load(),
-        stt=openai.STT(),
-        llm=openai.LLM(
-            model="gpt-4o-mini",
-            instructions=(
-                "You are 'Travlex', an AI Voice Travel Guide for Jammu & Kashmir Tourism. "
-                "You are talking directly to a traveler. Some users might be visually impaired or blind, "
-                "so speak clearly, expressively, and make your descriptions rich, vivid, and easy to visualize. "
-                "Do not use markdown syntax in your speech, as it will be read literally or confuse the audio rendering. "
-                "Always use the tool `search_tourism_db` when the user asks about spots, recommendation, or activities "
-                "in J&K, and rely solely on facts returned from the tool. Greet the traveler warmly."
-            )
-        ),
-        tts=openai.TTS(voice="alloy"),
+        stt=openai.STT(), # default STT uses standard OpenAI API key
+        llm=nvidia_llm,
+        tts=openai.TTS(voice="alloy"), # default TTS uses standard OpenAI API key
         fnc_ctx=fnc_ctx,
     )
 
     assistant.start(ctx.room)
     
-    # Greet the user when they join
     await assistant.say(
         "Welcome to Travlex! I am your voice travel assistant for Jammu and Kashmir. "
         "How can I help you plan your journey today?",
