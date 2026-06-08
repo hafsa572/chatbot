@@ -8,9 +8,9 @@ from dotenv import load_dotenv
 from livekit.agents import JobContext, WorkerOptions, cli, llm, voice
 from livekit.plugins import openai, silero
 
-# Load local environment files
-load_dotenv(dotenv_path=Path(__file__).parent / ".dev.vars")
-load_dotenv()
+# Load local environment files and override parent shell variables
+load_dotenv(dotenv_path=Path(__file__).parent / ".dev.vars", override=True)
+load_dotenv(override=True)
 
 # Load J&K tourism dataset
 places_json_path = Path(__file__).parent / "src" / "data" / "places.json"
@@ -135,19 +135,33 @@ async def entrypoint(ctx: JobContext):
         api_key=nvidia_api_key,
     )
 
-    # Ensure STT/TTS use the correct OpenAI base URL and key even if overridden in the shell env
+    # Clear proxy variables from os.environ to prevent the OpenAI client from using them
     openai_api_key = os.environ.get("OPENAI_API_KEY")
-    stt_kwargs = {}
-    tts_kwargs = {}
-    
+    if openai_api_key and openai_api_key.startswith("ABSK"):
+        print("Warning: Detected AWS Bedrock proxy key in shell environment. Ignoring for STT/TTS.")
+        openai_api_key = None
+        if "OPENAI_API_KEY" in os.environ:
+            del os.environ["OPENAI_API_KEY"]
+
     global_base_url = os.environ.get("OPENAI_BASE_URL")
     if global_base_url and "api.openai.com" not in global_base_url:
-        stt_kwargs["base_url"] = "https://api.openai.com/v1"
-        tts_kwargs["base_url"] = "https://api.openai.com/v1"
-        
-    if openai_api_key:
-        stt_kwargs["api_key"] = openai_api_key
-        tts_kwargs["api_key"] = openai_api_key
+        print(f"Warning: Detected non-OpenAI global base URL ({global_base_url}). Resetting for STT/TTS.")
+        if "OPENAI_BASE_URL" in os.environ:
+            del os.environ["OPENAI_BASE_URL"]
+
+    # Validate that we have an OpenAI API key before starting
+    openai_api_key = os.environ.get("OPENAI_API_KEY")
+    if not openai_api_key:
+        raise ValueError(
+            "\n\n[ERROR] OPENAI_API_KEY is not set or was ignored because it was a proxy key.\n"
+            "To run the local voice agent, you MUST define a valid OpenAI API key starting with 'sk-' "
+            "in your `.env.local` or `.dev.vars` file.\n"
+            "Example:\n"
+            "OPENAI_API_KEY=\"sk-proj-xxxx\"\n"
+        )
+
+    stt_kwargs = {"api_key": openai_api_key}
+    tts_kwargs = {"api_key": openai_api_key}
 
     # Initialize AgentSession
     session = voice.AgentSession(
