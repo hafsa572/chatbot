@@ -23,10 +23,10 @@ export async function POST(req: Request) {
         searchTourismDatabase: tool({
           description: "Search for tourist spots in Jammu & Kashmir using search terms (keywords, district, vibe, activity, season).",
           parameters: z.object({
-            query: z.string().describe("The search query or keyword (e.g. 'peaceful lake', 'Srinagar', 'skiing')."),
-            category: z.string().optional().describe("Optional category filter (e.g. 'Lake', 'Temple', 'Hill Station', 'Garden', 'Buddhist pilgrimage', 'Muslim pilgrimage')."),
+            query: z.string(),
+            category: z.string().optional(),
           }),
-          execute: async ({ query, category }) => {
+          execute: async ({ query, category }: { query: string; category?: string }) => {
             const results = searchPlaces(query, category || "All", 5);
             return results;
           },
@@ -34,9 +34,9 @@ export async function POST(req: Request) {
         getPlaceDetails: tool({
           description: "Retrieve comprehensive details, ratings, review snippets, and descriptions for a specific place name.",
           parameters: z.object({
-            name: z.string().describe("The exact or partial name of the place (e.g. 'Dal Lake', 'Vaishno Devi Temple')."),
+            name: z.string(),
           }),
-          execute: async ({ name }) => {
+          execute: async ({ name }: { name: string }) => {
             const detail = getPlaceDetails(name);
             if (!detail) {
               return { error: `Place '${name}' not found in the database.` };
