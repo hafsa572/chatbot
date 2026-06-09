@@ -41,5 +41,4 @@ yarn-error.log*
 next-env.d.ts
 .open-next
 .wrangler/
-.open-next/
-.open-next/
+.venv/

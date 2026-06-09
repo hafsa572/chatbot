@@ -1,4 +1,4 @@
-import { defineAgent, voice, tool } from "@livekit/agents";
+import { defineAgent, voice, llm } from "@livekit/agents";
 import * as openai from "@livekit/agents-plugin-openai";
 import * as silero from "@livekit/agents-plugin-silero";
 import dotenv from "dotenv";
@@ -102,7 +102,7 @@ function formatSearchResults(results: any[]): string {
 }
 
 // ── Define the tool using the SDK's tool() helper ───────────────────
-const searchTourismDb = tool({
+const searchTourismDb = llm.tool({
   description:
     "Search the local tourism database for India tourism locations based on keywords, district, activities, vibe, or category.",
   parameters: {
